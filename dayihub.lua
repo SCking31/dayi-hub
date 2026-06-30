@@ -1,5 +1,5 @@
 -- =============================================
--- Dayı Script Hub v8.1 - Credit Tab Eklendi
+-- Dayı Script Hub v9.5 - Full Script
 -- =============================================
 
 local Players = game:GetService("Players")
@@ -143,7 +143,7 @@ VisualTab.MouseButton1Click:Connect(function() switchTab(VisualTab) end)
 PlayerTab.MouseButton1Click:Connect(function() switchTab(PlayerTab) end)
 CreditTab.MouseButton1Click:Connect(function() switchTab(CreditTab) end)
 
--- ==================== GRAPHICS ====================
+-- ==================== GRAPHICS TAB ====================
 local VFXButton = Instance.new("TextButton")
 VFXButton.Size = UDim2.new(1, -20, 0, 65)
 VFXButton.Position = UDim2.new(0, 10, 0, 10)
@@ -181,7 +181,6 @@ VFXButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- FPS Booster
 local FPSButton = Instance.new("TextButton")
 FPSButton.Size = UDim2.new(1, -20, 0, 65)
 FPSButton.Position = UDim2.new(0, 10, 0, 85)
@@ -226,46 +225,319 @@ FPSButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- ==================== VISUAL ====================
+-- ==================== VISUAL TAB ====================
 local ESPButton = Instance.new("TextButton")
-ESPButton.Size = UDim2.new(0.9, 0, 0, 70)
+ESPButton.Size = UDim2.new(0.9, 0, 0, 50)
 ESPButton.Position = UDim2.new(0.05, 0, 0, 30)
 ESPButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-ESPButton.Text = "ESP Box"
+ESPButton.Text = "Wallhack ESP"
 ESPButton.TextColor3 = Color3.new(1,1,1)
 ESPButton.TextScaled = true
 ESPButton.Font = Enum.Font.GothamSemibold
 ESPButton.Parent = VisualContent
 
 local ESPEnabled = false
+local ESPColor = Color3.fromRGB(255, 0, 100)
 local ESPObjects = {}
-local function toggleESP()
+
+local function createWallhackESP(plr)
+    if plr == player or not plr.Character then return end
+    local root = plr.Character:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+    
+    local box = Instance.new("BoxHandleAdornment")
+    box.Adornee = root
+    box.Size = Vector3.new(4,6,2)
+    box.AlwaysOnTop = true
+    box.Transparency = 0.3
+    box.Color3 = ESPColor
+    box.ZIndex = 10
+    box.Parent = root
+    
+    ESPObjects[plr] = box
+end
+
+local function toggleWallhack()
     ESPEnabled = not ESPEnabled
     if ESPEnabled then
-        ESPButton.Text = "ESP Box: ON"
+        ESPButton.Text = "Wallhack ESP: ON"
         ESPButton.BackgroundColor3 = Color3.fromRGB(0, 220, 100)
         for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= player and plr.Character then
-                local box = Instance.new("BoxHandleAdornment")
-                box.Adornee = plr.Character:FindFirstChild("HumanoidRootPart")
-                box.Size = Vector3.new(4,6,2)
-                box.AlwaysOnTop = true
-                box.Transparency = 0.4
-                box.Color3 = Color3.fromRGB(255, 0, 100)
-                box.Parent = plr.Character
-                ESPObjects[plr] = box
-            end
+            createWallhackESP(plr)
         end
     else
-        ESPButton.Text = "ESP Box"
+        ESPButton.Text = "Wallhack ESP"
         ESPButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
         for _, box in pairs(ESPObjects) do box:Destroy() end
         ESPObjects = {}
     end
 end
-ESPButton.MouseButton1Click:Connect(toggleESP)
 
--- ==================== PLAYER ====================
+ESPButton.MouseButton1Click:Connect(toggleWallhack)
+
+-- ==================== AIMBOT + CIRCLE ====================
+local AimbotButton = Instance.new("TextButton")
+AimbotButton.Size = UDim2.new(0.9, 0, 0, 50)
+AimbotButton.Position = UDim2.new(0.05, 0, 0, 100)
+AimbotButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+AimbotButton.Text = "Aimbot: OFF"
+AimbotButton.TextColor3 = Color3.new(1,1,1)
+AimbotButton.TextScaled = true
+AimbotButton.Font = Enum.Font.GothamSemibold
+AimbotButton.Parent = VisualContent
+
+local KeybindButton = Instance.new("TextButton")
+KeybindButton.Size = UDim2.new(0.9, 0, 0, 40)
+KeybindButton.Position = UDim2.new(0.05, 0, 0, 160)
+KeybindButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+KeybindButton.Text = "Bind Key (None)"
+KeybindButton.TextColor3 = Color3.new(1,1,1)
+KeybindButton.TextScaled = true
+KeybindButton.Font = Enum.Font.GothamSemibold
+KeybindButton.Parent = VisualContent
+
+local TargetButton = Instance.new("TextButton")
+TargetButton.Size = UDim2.new(0.9, 0, 0, 40)
+TargetButton.Position = UDim2.new(0.05, 0, 0, 210)
+TargetButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+TargetButton.Text = "Target: Head"
+TargetButton.TextColor3 = Color3.new(1,1,1)
+TargetButton.TextScaled = true
+TargetButton.Font = Enum.Font.GothamSemibold
+TargetButton.Parent = VisualContent
+
+local ShowCircleButton = Instance.new("TextButton")
+ShowCircleButton.Size = UDim2.new(0.9, 0, 0, 40)
+ShowCircleButton.Position = UDim2.new(0.05, 0, 0, 260)
+ShowCircleButton.BackgroundColor3 = Color3.fromRGB(0, 180, 80)
+ShowCircleButton.Text = "Show Circle: ON"
+ShowCircleButton.TextColor3 = Color3.new(1,1,1)
+ShowCircleButton.TextScaled = true
+ShowCircleButton.Font = Enum.Font.GothamSemibold
+ShowCircleButton.Parent = VisualContent
+
+local CircleColorButton = Instance.new("TextButton")
+CircleColorButton.Size = UDim2.new(0.9, 0, 0, 40)
+CircleColorButton.Position = UDim2.new(0.05, 0, 0, 310)
+CircleColorButton.BackgroundColor3 = Color3.fromRGB(255, 255, 100)
+CircleColorButton.Text = "Circle Color"
+CircleColorButton.TextColor3 = Color3.new(0,0,0)
+CircleColorButton.TextScaled = true
+CircleColorButton.Font = Enum.Font.GothamSemibold
+CircleColorButton.Parent = VisualContent
+
+-- Circle Slider
+local CircleTitle = Instance.new("TextLabel")
+CircleTitle.Size = UDim2.new(0.9, 0, 0, 30)
+CircleTitle.Position = UDim2.new(0.05, 0, 0, 360)
+CircleTitle.BackgroundTransparency = 1
+CircleTitle.Text = "Circle Radius: 150"
+CircleTitle.TextColor3 = Color3.new(1,1,1)
+CircleTitle.TextScaled = true
+CircleTitle.Font = Enum.Font.GothamSemibold
+CircleTitle.Parent = VisualContent
+
+local CircleSliderBG = Instance.new("Frame")
+CircleSliderBG.Size = UDim2.new(0.9, 0, 0, 14)
+CircleSliderBG.Position = UDim2.new(0.05, 0, 0, 400)
+CircleSliderBG.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+CircleSliderBG.Parent = VisualContent
+
+local CircleSliderCorner = Instance.new("UICorner")
+CircleSliderCorner.CornerRadius = UDim.new(1, 0)
+CircleSliderCorner.Parent = CircleSliderBG
+
+local CircleSliderFill = Instance.new("Frame")
+CircleSliderFill.Size = UDim2.new(0.5, 0, 1, 0)
+CircleSliderFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+CircleSliderFill.Parent = CircleSliderBG
+
+local CircleSliderKnob = Instance.new("TextButton")
+CircleSliderKnob.Size = UDim2.new(0, 22, 0, 22)
+CircleSliderKnob.Position = UDim2.new(0.5, -11, 0.5, -11)
+CircleSliderKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+CircleSliderKnob.Text = ""
+CircleSliderKnob.Parent = CircleSliderBG
+
+local KnobCorner = Instance.new("UICorner")
+KnobCorner.CornerRadius = UDim.new(1, 0)
+KnobCorner.Parent = CircleSliderKnob
+
+local fovRadius = 150
+local showCircle = true
+local circleColor = Color3.fromRGB(255, 255, 100)
+local draggingCircle = false
+
+-- Circle Drawing
+local circleDrawing = Drawing.new("Circle")
+circleDrawing.Thickness = 1.5
+circleDrawing.NumSides = 64
+circleDrawing.Radius = fovRadius
+circleDrawing.Color = circleColor
+circleDrawing.Transparency = 0.7
+circleDrawing.Filled = false
+circleDrawing.Visible = showCircle
+
+local function updateCirclePosition()
+    local camera = workspace.CurrentCamera
+    circleDrawing.Position = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+end
+
+local function updateCircleSlider()
+    local percent = (fovRadius - 50) / (400 - 50)
+    CircleSliderFill.Size = UDim2.new(percent, 0, 1, 0)
+    CircleSliderKnob.Position = UDim2.new(percent, -11, 0.5, -11)
+    CircleTitle.Text = "Circle Radius: " .. math.floor(fovRadius)
+    circleDrawing.Radius = fovRadius
+end
+
+CircleSliderKnob.MouseButton1Down:Connect(function() draggingCircle = true end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingCircle = false end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if draggingCircle and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local mouseX = input.Position.X
+        local sliderX = CircleSliderBG.AbsolutePosition.X
+        local sliderW = CircleSliderBG.AbsoluteSize.X
+        local percent = math.clamp((mouseX - sliderX) / sliderW, 0, 1)
+        fovRadius = math.floor(50 + (400 - 50) * percent)
+        updateCircleSlider()
+    end
+end)
+
+-- Show Circle
+ShowCircleButton.MouseButton1Click:Connect(function()
+    showCircle = not showCircle
+    circleDrawing.Visible = showCircle
+    if showCircle then
+        ShowCircleButton.Text = "Show Circle: ON"
+        ShowCircleButton.BackgroundColor3 = Color3.fromRGB(0, 180, 80)
+    else
+        ShowCircleButton.Text = "Show Circle: OFF"
+        ShowCircleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+    end
+end)
+
+-- Circle Color
+local circleColors = {
+    {name = "Yellow", color = Color3.fromRGB(255, 255, 100)},
+    {name = "Red", color = Color3.fromRGB(255, 50, 50)},
+    {name = "Cyan", color = Color3.fromRGB(0, 255, 255)},
+    {name = "Purple", color = Color3.fromRGB(180, 0, 255)},
+    {name = "White", color = Color3.fromRGB(255, 255, 255)}
+}
+
+local currentCircleColorIndex = 1
+
+CircleColorButton.MouseButton1Click:Connect(function()
+    currentCircleColorIndex = currentCircleColorIndex % #circleColors + 1
+    circleColor = circleColors[currentCircleColorIndex].color
+    CircleColorButton.Text = "Circle Color (" .. circleColors[currentCircleColorIndex].name .. ")"
+    CircleColorButton.BackgroundColor3 = circleColor
+    circleDrawing.Color = circleColor
+end)
+
+-- Aimbot Değişkenleri
+local aimbotEnabled = false
+local aimbotKey = nil
+local isAimbotKeyPressed = false
+local binding = false
+local aimbotTarget = "Head"
+
+local function toggleAimbot()
+    aimbotEnabled = not aimbotEnabled
+    if aimbotEnabled then
+        AimbotButton.Text = "Aimbot: ON"
+        AimbotButton.BackgroundColor3 = Color3.fromRGB(0, 220, 100)
+    else
+        AimbotButton.Text = "Aimbot: OFF"
+        AimbotButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    end
+end
+
+AimbotButton.MouseButton1Click:Connect(toggleAimbot)
+
+-- Tuş Atama
+KeybindButton.MouseButton1Click:Connect(function()
+    binding = true
+    KeybindButton.Text = "Press Any Key..."
+    KeybindButton.BackgroundColor3 = Color3.fromRGB(255, 140, 0)
+end)
+
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    
+    if binding then
+        aimbotKey = input.KeyCode
+        KeybindButton.Text = "Key: " .. input.KeyCode.Name
+        KeybindButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+        binding = false
+        return
+    end
+    
+    if input.KeyCode == aimbotKey then
+        isAimbotKeyPressed = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.KeyCode == aimbotKey then
+        isAimbotKeyPressed = false
+    end
+end)
+
+-- Hedef Değiştir
+TargetButton.MouseButton1Click:Connect(function()
+    if aimbotTarget == "Head" then
+        aimbotTarget = "HumanoidRootPart"
+        TargetButton.Text = "Target: Body"
+    else
+        aimbotTarget = "Head"
+        TargetButton.Text = "Target: Head"
+    end
+end)
+
+-- Aimbot + Circle
+RunService.Heartbeat:Connect(function()
+    updateCirclePosition()
+    
+    if not aimbotEnabled or not isAimbotKeyPressed then return end
+    
+    local camera = workspace.CurrentCamera
+    local myRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return end
+    
+    local closest = nil
+    local shortestDistance = math.huge
+    
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player and plr.Character then
+            local targetPart = plr.Character:FindFirstChild(aimbotTarget)
+            if targetPart then
+                local screenPos, onScreen = camera:WorldToViewportPoint(targetPart.Position)
+                if onScreen then
+                    local distanceFromCenter = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)).Magnitude
+                    if distanceFromCenter <= fovRadius then
+                        local distance = (targetPart.Position - myRoot.Position).Magnitude
+                        if distance < shortestDistance then
+                            shortestDistance = distance
+                            closest = targetPart
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    if closest then
+        camera.CFrame = CFrame.lookAt(camera.CFrame.Position, closest.Position)
+    end
+end)
+
+-- ==================== PLAYER TAB ====================
 local SpeedTitle = Instance.new("TextLabel")
 SpeedTitle.Size = UDim2.new(0.9, 0, 0, 40)
 SpeedTitle.Position = UDim2.new(0.05, 0, 0, 20)
@@ -280,7 +552,7 @@ local SpeedValueLabel = Instance.new("TextLabel")
 SpeedValueLabel.Size = UDim2.new(0.9, 0, 0, 30)
 SpeedValueLabel.Position = UDim2.new(0.05, 0, 0, 70)
 SpeedValueLabel.BackgroundTransparency = 1
-SpeedValueLabel.Text = "Hız: 50"
+SpeedValueLabel.Text = "Speed: 50"
 SpeedValueLabel.TextColor3 = Color3.new(1,1,1)
 SpeedValueLabel.TextScaled = true
 SpeedValueLabel.Font = Enum.Font.GothamSemibold
@@ -313,12 +585,15 @@ KnobCorner.CornerRadius = UDim.new(1, 0)
 KnobCorner.Parent = SliderKnob
 
 local draggingSlider = false
+local speedEnabled = false
+local currentSpeed = 50
+local maxSpeed = 200
 
 local function updateSlider()
     local percent = (currentSpeed - 16) / (maxSpeed - 16)
     SliderFill.Size = UDim2.new(percent, 0, 1, 0)
     SliderKnob.Position = UDim2.new(percent, -11, 0.5, -11)
-    SpeedValueLabel.Text = "Hız: " .. math.floor(currentSpeed)
+    SpeedValueLabel.Text = "Speed: " .. math.floor(currentSpeed)
 end
 
 SliderKnob.MouseButton1Down:Connect(function() draggingSlider = true end)
@@ -360,10 +635,48 @@ SpeedToggle.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Bunny Hop
+local BunnyHopButton = Instance.new("TextButton")
+BunnyHopButton.Size = UDim2.new(0.9, 0, 0, 70)
+BunnyHopButton.Position = UDim2.new(0.05, 0, 0, 250)
+BunnyHopButton.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+BunnyHopButton.Text = "Bunny Hop"
+BunnyHopButton.TextColor3 = Color3.new(1,1,1)
+BunnyHopButton.TextScaled = true
+BunnyHopButton.Font = Enum.Font.GothamSemibold
+BunnyHopButton.Parent = PlayerContent
+
+local bunnyHopEnabled = false
+
+local function toggleBunnyHop()
+    bunnyHopEnabled = not bunnyHopEnabled
+    if bunnyHopEnabled then
+        BunnyHopButton.Text = "Bunny Hop: ON"
+        BunnyHopButton.BackgroundColor3 = Color3.fromRGB(0, 220, 100)
+    else
+        BunnyHopButton.Text = "Bunny Hop"
+        BunnyHopButton.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+    end
+end
+
+BunnyHopButton.MouseButton1Click:Connect(toggleBunnyHop)
+
+-- Bunny Hop Zıplama
+RunService.Heartbeat:Connect(function()
+    if not bunnyHopEnabled then return end
+    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+        local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.JumpPower = 19
+            humanoid.Jump = true
+        end
+    end
+end)
+
 -- Fly
 local FlyButton = Instance.new("TextButton")
 FlyButton.Size = UDim2.new(0.9, 0, 0, 70)
-FlyButton.Position = UDim2.new(0.05, 0, 0, 250)
+FlyButton.Position = UDim2.new(0.05, 0, 0, 340)
 FlyButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
 FlyButton.Text = "Fly"
 FlyButton.TextColor3 = Color3.new(1,1,1)
@@ -425,7 +738,7 @@ FlyButton.MouseButton1Click:Connect(toggleFly)
 -- Noclip
 local NoclipButton = Instance.new("TextButton")
 NoclipButton.Size = UDim2.new(0.9, 0, 0, 70)
-NoclipButton.Position = UDim2.new(0.05, 0, 0, 340)
+NoclipButton.Position = UDim2.new(0.05, 0, 0, 430)
 NoclipButton.BackgroundColor3 = Color3.fromRGB(180, 0, 255)
 NoclipButton.Text = "Noclip"
 NoclipButton.TextColor3 = Color3.new(1,1,1)
@@ -466,7 +779,7 @@ local function toggleNoclip()
 end
 NoclipButton.MouseButton1Click:Connect(toggleNoclip)
 
--- ==================== CREDIT TAB ====================
+-- Credit Tab
 local CreditTitle = Instance.new("TextLabel")
 CreditTitle.Size = UDim2.new(0.9, 0, 0, 50)
 CreditTitle.Position = UDim2.new(0.05, 0, 0, 30)
@@ -516,4 +829,4 @@ UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
 end)
 
-print("✅ Dayı Hub v8.1 - Credit Tab Eklendi!")
+print("✅ Dayı Hub v9.5 - Still in progress!")
