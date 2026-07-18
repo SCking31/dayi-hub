@@ -1,10 +1,11 @@
 -- =============================================
--- Dayı Script Hub v9.5 - Full Script
+-- Dayı Script Hub v9.7 - Skeleton Fix
 -- =============================================
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -19,7 +20,7 @@ MainFrame.Size = UDim2.new(0, 640, 0, 620)
 MainFrame.Position = UDim2.new(0.5, -320, 0.5, -310)
 MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
 MainFrame.BorderSizePixel = 0
-MainFrame.Visible = true
+MainFrame.Visible = false
 MainFrame.Parent = ScreenGui
 
 local UICorner = Instance.new("UICorner")
@@ -143,10 +144,42 @@ VisualTab.MouseButton1Click:Connect(function() switchTab(VisualTab) end)
 PlayerTab.MouseButton1Click:Connect(function() switchTab(PlayerTab) end)
 CreditTab.MouseButton1Click:Connect(function() switchTab(CreditTab) end)
 
--- ==================== GRAPHICS TAB ====================
+-- ==================== GRAPHICS ====================
+local UnlimitedZoomButton = Instance.new("TextButton")
+UnlimitedZoomButton.Size = UDim2.new(1, -20, 0, 65)
+UnlimitedZoomButton.Position = UDim2.new(0, 10, 0, 10)
+UnlimitedZoomButton.BackgroundColor3 = Color3.fromRGB(0, 180, 80)
+UnlimitedZoomButton.Text = "Unlimited Zoom"
+UnlimitedZoomButton.TextColor3 = Color3.new(1,1,1)
+UnlimitedZoomButton.TextScaled = true
+UnlimitedZoomButton.Font = Enum.Font.GothamSemibold
+UnlimitedZoomButton.Parent = GraphicsContent
+
+local zoomEnabled = false
+local originalMinZoom = nil
+local originalMaxZoom = nil
+
+UnlimitedZoomButton.MouseButton1Click:Connect(function()
+    zoomEnabled = not zoomEnabled
+    local camera = workspace.CurrentCamera
+    if zoomEnabled then
+        UnlimitedZoomButton.Text = "Unlimited Zoom: ON"
+        UnlimitedZoomButton.BackgroundColor3 = Color3.fromRGB(0, 220, 100)
+        originalMinZoom = camera.MinZoom
+        originalMaxZoom = camera.MaxZoom
+        camera.MinZoom = 0.1
+        camera.MaxZoom = 10000
+    else
+        UnlimitedZoomButton.Text = "Unlimited Zoom"
+        UnlimitedZoomButton.BackgroundColor3 = Color3.fromRGB(0, 180, 80)
+        if originalMinZoom then camera.MinZoom = originalMinZoom end
+        if originalMaxZoom then camera.MaxZoom = originalMaxZoom end
+    end
+end)
+
 local VFXButton = Instance.new("TextButton")
 VFXButton.Size = UDim2.new(1, -20, 0, 65)
-VFXButton.Position = UDim2.new(0, 10, 0, 10)
+VFXButton.Position = UDim2.new(0, 10, 0, 85)
 VFXButton.BackgroundColor3 = Color3.fromRGB(0, 180, 80)
 VFXButton.Text = "VFX Remover"
 VFXButton.TextColor3 = Color3.new(1,1,1)
@@ -183,7 +216,7 @@ end)
 
 local FPSButton = Instance.new("TextButton")
 FPSButton.Size = UDim2.new(1, -20, 0, 65)
-FPSButton.Position = UDim2.new(0, 10, 0, 85)
+FPSButton.Position = UDim2.new(0, 10, 0, 160)
 FPSButton.BackgroundColor3 = Color3.fromRGB(255, 140, 0)
 FPSButton.Text = "FPS Booster"
 FPSButton.TextColor3 = Color3.new(1,1,1)
@@ -225,20 +258,32 @@ FPSButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- ==================== VISUAL TAB ====================
-local ESPButton = Instance.new("TextButton")
-ESPButton.Size = UDim2.new(0.9, 0, 0, 50)
-ESPButton.Position = UDim2.new(0.05, 0, 0, 30)
-ESPButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-ESPButton.Text = "Wallhack ESP"
-ESPButton.TextColor3 = Color3.new(1,1,1)
-ESPButton.TextScaled = true
-ESPButton.Font = Enum.Font.GothamSemibold
-ESPButton.Parent = VisualContent
+-- ==================== VISUAL ====================
+local WallhackButton = Instance.new("TextButton")
+WallhackButton.Size = UDim2.new(0.9, 0, 0, 50)
+WallhackButton.Position = UDim2.new(0.05, 0, 0, 30)
+WallhackButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+WallhackButton.Text = "Wallhack ESP"
+WallhackButton.TextColor3 = Color3.new(1,1,1)
+WallhackButton.TextScaled = true
+WallhackButton.Font = Enum.Font.GothamSemibold
+WallhackButton.Parent = VisualContent
+
+local SkeletonButton = Instance.new("TextButton")
+SkeletonButton.Size = UDim2.new(0.9, 0, 0, 50)
+SkeletonButton.Position = UDim2.new(0.05, 0, 0, 90)
+SkeletonButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+SkeletonButton.Text = "Skeleton ESP"
+SkeletonButton.TextColor3 = Color3.new(1,1,1)
+SkeletonButton.TextScaled = true
+SkeletonButton.Font = Enum.Font.GothamSemibold
+SkeletonButton.Parent = VisualContent
 
 local ESPEnabled = false
+local SkeletonEnabled = false
 local ESPColor = Color3.fromRGB(255, 0, 100)
 local ESPObjects = {}
+local SkeletonObjects = {}
 
 local function createWallhackESP(plr)
     if plr == player or not plr.Character then return end
@@ -257,28 +302,89 @@ local function createWallhackESP(plr)
     ESPObjects[plr] = box
 end
 
+local function createSkeletonESP(plr)
+    if plr == player or not plr.Character then return end
+    local character = plr.Character
+    if SkeletonObjects[plr] then SkeletonObjects[plr]:Destroy() end
+    
+    local skeleton = Instance.new("Model")
+    skeleton.Name = "SkeletonESP"
+    skeleton.Parent = character
+    
+    local limbs = {
+        {"Head", "UpperTorso"},
+        {"UpperTorso", "LowerTorso"},
+        {"UpperTorso", "LeftUpperArm"},
+        {"LeftUpperArm", "LeftLowerArm"},
+        {"LeftLowerArm", "LeftHand"},
+        {"UpperTorso", "RightUpperArm"},
+        {"RightUpperArm", "RightLowerArm"},
+        {"RightLowerArm", "RightHand"},
+        {"LowerTorso", "LeftUpperLeg"},
+        {"LeftUpperLeg", "LeftLowerLeg"},
+        {"LeftLowerLeg", "LeftFoot"},
+        {"LowerTorso", "RightUpperLeg"},
+        {"RightUpperLeg", "RightLowerLeg"},
+        {"RightLowerLeg", "RightFoot"}
+    }
+    
+    for _, pair in ipairs(limbs) do
+        local part1 = character:FindFirstChild(pair[1])
+        local part2 = character:FindFirstChild(pair[2])
+        if part1 and part2 then
+            local line = Instance.new("LineHandleAdornment")
+            line.Adornee = part1
+            line.Attachment0 = Instance.new("Attachment", part1)
+            line.Attachment1 = Instance.new("Attachment", part2)
+            line.Color3 = ESPColor
+            line.Thickness = 3
+            line.Transparency = 0.3
+            line.Parent = skeleton
+        end
+    end
+    
+    SkeletonObjects[plr] = skeleton
+end
+
 local function toggleWallhack()
     ESPEnabled = not ESPEnabled
     if ESPEnabled then
-        ESPButton.Text = "Wallhack ESP: ON"
-        ESPButton.BackgroundColor3 = Color3.fromRGB(0, 220, 100)
+        WallhackButton.Text = "Wallhack ESP: ON"
+        WallhackButton.BackgroundColor3 = Color3.fromRGB(0, 220, 100)
         for _, plr in ipairs(Players:GetPlayers()) do
             createWallhackESP(plr)
         end
     else
-        ESPButton.Text = "Wallhack ESP"
-        ESPButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+        WallhackButton.Text = "Wallhack ESP"
+        WallhackButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
         for _, box in pairs(ESPObjects) do box:Destroy() end
         ESPObjects = {}
     end
 end
 
-ESPButton.MouseButton1Click:Connect(toggleWallhack)
+local function toggleSkeleton()
+    SkeletonEnabled = not SkeletonEnabled
+    if SkeletonEnabled then
+        SkeletonButton.Text = "Skeleton ESP: ON"
+        SkeletonButton.BackgroundColor3 = Color3.fromRGB(0, 220, 100)
+        for _, plr in ipairs(Players:GetPlayers()) do
+            createSkeletonESP(plr)
+        end
+    else
+        SkeletonButton.Text = "Skeleton ESP"
+        SkeletonButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+        for _, skeleton in pairs(SkeletonObjects) do skeleton:Destroy() end
+        SkeletonObjects = {}
+    end
+end
+
+WallhackButton.MouseButton1Click:Connect(toggleWallhack)
+SkeletonButton.MouseButton1Click:Connect(toggleSkeleton)
 
 -- ==================== AIMBOT + CIRCLE ====================
 local AimbotButton = Instance.new("TextButton")
 AimbotButton.Size = UDim2.new(0.9, 0, 0, 50)
-AimbotButton.Position = UDim2.new(0.05, 0, 0, 100)
+AimbotButton.Position = UDim2.new(0.05, 0, 0, 160)
 AimbotButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 AimbotButton.Text = "Aimbot: OFF"
 AimbotButton.TextColor3 = Color3.new(1,1,1)
@@ -286,9 +392,19 @@ AimbotButton.TextScaled = true
 AimbotButton.Font = Enum.Font.GothamSemibold
 AimbotButton.Parent = VisualContent
 
+local MobileAimbotButton = Instance.new("TextButton")
+MobileAimbotButton.Size = UDim2.new(0.9, 0, 0, 50)
+MobileAimbotButton.Position = UDim2.new(0.05, 0, 0, 220)
+MobileAimbotButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+MobileAimbotButton.Text = "Mobile Aimbot: OFF"
+MobileAimbotButton.TextColor3 = Color3.new(1,1,1)
+MobileAimbotButton.TextScaled = true
+MobileAimbotButton.Font = Enum.Font.GothamSemibold
+MobileAimbotButton.Parent = VisualContent
+
 local KeybindButton = Instance.new("TextButton")
 KeybindButton.Size = UDim2.new(0.9, 0, 0, 40)
-KeybindButton.Position = UDim2.new(0.05, 0, 0, 160)
+KeybindButton.Position = UDim2.new(0.05, 0, 0, 280)
 KeybindButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
 KeybindButton.Text = "Bind Key (None)"
 KeybindButton.TextColor3 = Color3.new(1,1,1)
@@ -298,7 +414,7 @@ KeybindButton.Parent = VisualContent
 
 local TargetButton = Instance.new("TextButton")
 TargetButton.Size = UDim2.new(0.9, 0, 0, 40)
-TargetButton.Position = UDim2.new(0.05, 0, 0, 210)
+TargetButton.Position = UDim2.new(0.05, 0, 0, 330)
 TargetButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 TargetButton.Text = "Target: Head"
 TargetButton.TextColor3 = Color3.new(1,1,1)
@@ -308,7 +424,7 @@ TargetButton.Parent = VisualContent
 
 local ShowCircleButton = Instance.new("TextButton")
 ShowCircleButton.Size = UDim2.new(0.9, 0, 0, 40)
-ShowCircleButton.Position = UDim2.new(0.05, 0, 0, 260)
+ShowCircleButton.Position = UDim2.new(0.05, 0, 0, 380)
 ShowCircleButton.BackgroundColor3 = Color3.fromRGB(0, 180, 80)
 ShowCircleButton.Text = "Show Circle: ON"
 ShowCircleButton.TextColor3 = Color3.new(1,1,1)
@@ -318,7 +434,7 @@ ShowCircleButton.Parent = VisualContent
 
 local CircleColorButton = Instance.new("TextButton")
 CircleColorButton.Size = UDim2.new(0.9, 0, 0, 40)
-CircleColorButton.Position = UDim2.new(0.05, 0, 0, 310)
+CircleColorButton.Position = UDim2.new(0.05, 0, 0, 430)
 CircleColorButton.BackgroundColor3 = Color3.fromRGB(255, 255, 100)
 CircleColorButton.Text = "Circle Color"
 CircleColorButton.TextColor3 = Color3.new(0,0,0)
@@ -329,7 +445,7 @@ CircleColorButton.Parent = VisualContent
 -- Circle Slider
 local CircleTitle = Instance.new("TextLabel")
 CircleTitle.Size = UDim2.new(0.9, 0, 0, 30)
-CircleTitle.Position = UDim2.new(0.05, 0, 0, 360)
+CircleTitle.Position = UDim2.new(0.05, 0, 0, 480)
 CircleTitle.BackgroundTransparency = 1
 CircleTitle.Text = "Circle Radius: 150"
 CircleTitle.TextColor3 = Color3.new(1,1,1)
@@ -339,7 +455,7 @@ CircleTitle.Parent = VisualContent
 
 local CircleSliderBG = Instance.new("Frame")
 CircleSliderBG.Size = UDim2.new(0.9, 0, 0, 14)
-CircleSliderBG.Position = UDim2.new(0.05, 0, 0, 400)
+CircleSliderBG.Position = UDim2.new(0.05, 0, 0, 520)
 CircleSliderBG.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
 CircleSliderBG.Parent = VisualContent
 
@@ -442,6 +558,7 @@ end)
 
 -- Aimbot Değişkenleri
 local aimbotEnabled = false
+local mobileAimbotEnabled = false
 local aimbotKey = nil
 local isAimbotKeyPressed = false
 local binding = false
@@ -458,7 +575,19 @@ local function toggleAimbot()
     end
 end
 
+local function toggleMobileAimbot()
+    mobileAimbotEnabled = not mobileAimbotEnabled
+    if mobileAimbotEnabled then
+        MobileAimbotButton.Text = "Mobile Aimbot: ON"
+        MobileAimbotButton.BackgroundColor3 = Color3.fromRGB(0, 220, 100)
+    else
+        MobileAimbotButton.Text = "Mobile Aimbot: OFF"
+        MobileAimbotButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    end
+end
+
 AimbotButton.MouseButton1Click:Connect(toggleAimbot)
+MobileAimbotButton.MouseButton1Click:Connect(toggleMobileAimbot)
 
 -- Tuş Atama
 KeybindButton.MouseButton1Click:Connect(function()
@@ -504,7 +633,8 @@ end)
 RunService.Heartbeat:Connect(function()
     updateCirclePosition()
     
-    if not aimbotEnabled or not isAimbotKeyPressed then return end
+    local isAimbotActive = (aimbotEnabled and isAimbotKeyPressed) or mobileAimbotEnabled
+    if not isAimbotActive then return end
     
     local camera = workspace.CurrentCamera
     local myRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
@@ -537,7 +667,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- ==================== PLAYER TAB ====================
+-- ==================== PLAYER ====================
 local SpeedTitle = Instance.new("TextLabel")
 SpeedTitle.Size = UDim2.new(0.9, 0, 0, 40)
 SpeedTitle.Position = UDim2.new(0.05, 0, 0, 20)
@@ -661,7 +791,6 @@ end
 
 BunnyHopButton.MouseButton1Click:Connect(toggleBunnyHop)
 
--- Bunny Hop Zıplama
 RunService.Heartbeat:Connect(function()
     if not bunnyHopEnabled then return end
     if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
@@ -802,14 +931,42 @@ CreditText.Font = Enum.Font.GothamSemibold
 CreditText.TextXAlignment = Enum.TextXAlignment.Left
 CreditText.Parent = CreditContent
 
--- Right Control + Sürükleme
+-- ==================== ANIMATION ====================
+local function showUI()
+    MainFrame.Visible = true
+    MainFrame.Size = UDim2.new(0, 0, 0, 0)
+    MainFrame.BackgroundTransparency = 1
+    
+    local tweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+    TweenService:Create(MainFrame, tweenInfo, {Size = UDim2.new(0, 640, 0, 620), BackgroundTransparency = 0}):Play()
+end
+
+local function hideUI()
+    local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
+    local tween = TweenService:Create(MainFrame, tweenInfo, {Size = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1})
+    tween:Play()
+    tween.Completed:Connect(function()
+        MainFrame.Visible = false
+    end)
+end
+
+-- Right Control Toggle
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == Enum.KeyCode.RightControl then
-        MainFrame.Visible = not MainFrame.Visible
+        if MainFrame.Visible then
+            hideUI()
+        else
+            showUI()
+        end
     end
 end)
 
+-- Initial Show
+task.wait(0.5)
+showUI()
+
+-- Right Control + Sürükleme
 local dragging = false
 local dragStart, startPos
 TitleBar.InputBegan:Connect(function(input)
@@ -829,4 +986,4 @@ UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
 end)
 
-print("✅ Dayı Hub v9.5 - Still in progress!")
+print("✅ Dayı Hub v9.7 - Skeleton ESP Düzeltildi!")
